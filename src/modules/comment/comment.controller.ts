@@ -1,8 +1,20 @@
 import { NextFunction, Request, Response } from "express";
+import httpStatus from "http-status";
 import { catchAsync } from "../../utils/catchAsync";
+import { sendResponse } from "../../utils/sendResponse";
+import { commentService } from "./comment.service";
 
 const createComment = catchAsync(
-  async (req: Request, res: Response, next: NextFunction) => {},
+  async (req: Request, res: Response, next: NextFunction) => {
+    const authorId = req.user?.id as string;
+    const result = await commentService.createComment(authorId, req.body);
+    sendResponse(res, {
+      success: true,
+      statusCode: httpStatus.CREATED,
+      message: "Comment created successfully",
+      data: result,
+    });
+  },
 );
 
 const getCommentByAuthorId = catchAsync(
