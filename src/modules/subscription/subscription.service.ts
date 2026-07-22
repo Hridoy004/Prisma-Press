@@ -1,7 +1,10 @@
-import Stripe from "stripe";
 import config from "../../config";
 import { prisma } from "../../lib/prisma";
 import { stripe } from "../../lib/stripe";
+import {
+  handleChangeSubscription,
+  handleCheckoutCompleted,
+} from "./subscription.utils";
 
 const createCheckoutSession = async (userId: string) => {
   const transactionResult = await prisma.$transaction(async (tx) => {
@@ -62,61 +65,20 @@ const handleWebhook = async (payload: Buffer, signature: string) => {
   switch (event.type) {
     case "checkout.session.completed":
       await handleCheckoutCompleted(event.data.object);
-
       break;
 
     case "customer.subscription.updated":
+      handleChangeSubscription(event.data.object);
       break;
 
     case "customer.subscription.deleted":
+      handleChangeSubscription(event.data.object);
       break;
 
     default:
       console.log(`No events matched. Unhandled event type ${event.type}`);
       break;
   }
-};
-
-const getPeriodEnd = (payload: Stripe.Subscription) => {
-  const currentPeriodEndInMillisecond =
-    payload.items.data[0]?.current_period_end!;
-  const currentPeriodEnd = new Date(currentPeriodEndInMillisecond * 1000);
-
-  return currentPeriodEnd;
-};
-
-const handleCheckoutCompleted = async (session: Stripe.Checkout.Session) => {
-  const userId = session.metadata?.userId;
-  const stripeCustomerId = session.customer as string;
-  const stripeSubscriptionId = session.subscription as string;
-
-  if (!userId || !stripeSubscriptionId || !stripeCustomerId) {
-    throw new Error("Webhook Failed");
-  }
-
-  const stripeSubscription =
-    await stripe.subscriptions.retrieve(stripeSubscriptionId);
-
-  const currentPeriodEnd = getPeriodEnd(stripeSubscription);
-
-  await prisma.subscription.upsert({
-    where: {
-      userId,
-    },
-    create: {
-      userId,
-      stripeCustomerId,
-      stripeSubscriptionId,
-      status: "ACTIVE",
-      currentPeriodEnd,
-    },
-    update: {
-      stripeCustomerId,
-      stripeSubscriptionId,
-      status: "ACTIVE",
-      currentPeriodEnd,
-    },
-  });
 };
 
 export const subscriptionServices = {
