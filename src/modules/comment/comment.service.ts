@@ -51,15 +51,6 @@ const getCommentByCommentId = async (commentId: string) => {
     where: {
       id: commentId,
     },
-    include: {
-      post: {
-        select: {
-          id: true,
-          title: true,
-          views: true,
-        },
-      },
-    },
   });
 
   return comment;

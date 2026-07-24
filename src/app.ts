@@ -7,6 +7,7 @@ import { notFound } from "./middlewares/notFound";
 import { authRoutes } from "./modules/auth/auth.routes";
 import { commentRoutes } from "./modules/comment/comment.route";
 import { postRoutes } from "./modules/post/post.route";
+import { premiumRoutes } from "./modules/premium/premium.route";
 import { subscriptionRoutes } from "./modules/subscription/subscription.route";
 import { userRouters } from "./modules/user/user.route";
 
@@ -19,7 +20,7 @@ app.use(
   }),
 );
 
-const endpointSecret = config.stripe_webhook_secret;
+// const endpointSecret = config.stripe_webhook_secret;
 
 // app.post(
 //   "/api/subscription/webhook",
@@ -85,6 +86,7 @@ app.use("/api/auth", authRoutes);
 app.use("/api/posts", postRoutes);
 app.use("/api/comments", commentRoutes);
 app.use("/api/subscription", subscriptionRoutes);
+app.use("/api/premium", premiumRoutes);
 
 app.use(notFound);
 app.use(globalErrorHandler);

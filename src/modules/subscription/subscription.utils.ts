@@ -85,3 +85,6 @@ export const handleChangeSubscription = async (
     },
   });
 };
+
+// update - stripe trigger customer.subscription.updated
+// delete - stripe subscriptions cancel sub_1TvskaFslmBRliUQufkliou5
