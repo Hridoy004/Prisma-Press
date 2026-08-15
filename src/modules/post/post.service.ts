@@ -244,7 +244,6 @@ const getAllPosts = async (query: IPostQuery) => {
     },
 
     take: limit,
-
     skip: skip,
 
     orderBy: {
